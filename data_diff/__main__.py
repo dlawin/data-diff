@@ -246,12 +246,12 @@ click.Context.formatter_class = MyHelpFormatter
 @click.option(
     "--dbt",
     is_flag=True,
-    help="Run dbt diff.",
+    help="Run a diff using your local dbt project. Expects to be run from a dbt project folder by default.",
 )
 @click.option(
     "--dbt-cloud",
     is_flag=True,
-    help="Run dbt diff on Datafold cloud. Expects an api key on env var DATAFOLD_API_KEY.",
+    help="Run a diff using your local dbt project on Datafold cloud. Expects an api key on env var DATAFOLD_API_KEY.",
 )
 @click.option(
     "--dbt-profiles-dir",
