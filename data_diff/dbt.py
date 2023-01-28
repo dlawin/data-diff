@@ -225,7 +225,8 @@ class DbtParser:
         try:
             vars = self.project_dict.get("vars").get("data_diff")
             assert vars is not None
-        except:
+        except Exception as e:
+            logging.debug(e)
             raise (Exception("Expected values in dbt_project.yml under \nvars:\n  data_diff:"))
         return vars
 
