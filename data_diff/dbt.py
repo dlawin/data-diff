@@ -4,6 +4,7 @@ import requests
 import json
 import yaml
 import rich
+import logging
 
 from dataclasses import dataclass
 from packaging.version import parse as parse_version
@@ -16,6 +17,8 @@ CONST_RUN_RESULTS_PATH = "/target/run_results.json"
 CONST_MANIFEST_PATH = "/target/manifest.json"
 CONST_PROJECT_FILE = "/dbt_project.yml"
 CONST_PROFILES_FILE = "/profiles.yml"
+CONST_DBT_V_ABOVE = "1.0.0"
+CONST_DBT_V_BELOW = "1.4.0"
 
 
 @dataclass
@@ -110,7 +113,21 @@ class DbtDiffer:
         table2 = connect_to_table(diff_vars.connection, prod_qualified_string, primary_key)
 
         table1_columns = list(table1.get_schema())
-        table2_columns = list(table2.get_schema())
+        try:
+            table2_columns = list(table2.get_schema())
+        # TODO add a unit test for scenario
+        except Exception as e:
+            logging.debug(e)
+            rich.print(
+                "[red]"
+                + dev_qualified_string
+                + " <> "
+                + prod_qualified_string
+                + "[/] \n"
+                + column_diffs_str
+                + "[green]New model or no access to prod table.[/] \n"
+            )
+            return
 
         mutual_set = set(table1_columns) & set(table2_columns)
         table1_set_diff = list(set(table1_columns) - set(table2_columns))
@@ -217,9 +234,13 @@ class DbtParser:
             run_results_dict = json.load(run_results)
             run_results_obj = parse_run_results(run_results=run_results_dict)
 
-        assert parse_version(run_results_obj.metadata.dbt_version) >= parse_version(
+        # TODO need test for less than scenario
+        dbt_version = parse_version(run_results_obj.metadata.dbt_version)
+        assert dbt_version >= parse_version(
             "1.0.0"
-        ), "Expected the dbt project's version to be >= 1.0.0"
+        ) and dbt_version < parse_version(
+            "1.4"
+        ), f"Found dbt: v{dbt_version} Expected the dbt project's version to be >= {CONST_DBT_V_ABOVE} and < {CONST_DBT_V_BELOW}"
 
         with open(self.project_dir + CONST_MANIFEST_PATH) as manifest:
             manifest_dict = json.load(manifest)
