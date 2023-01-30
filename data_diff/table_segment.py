@@ -82,12 +82,7 @@ class TableSegment:
         return self._with_raw_schema(self.database.query_table_schema(self.table_path))
 
     def get_schema(self):
-        if len(self.table_path) == 3:
-            table_path = self.table_path[1:]
-        else:
-            table_path = self.table_path
-        
-        return self.database.query_table_schema(table_path)
+        return self.database.query_table_schema(self.table_path)
 
     def _make_key_range(self):
         if self.min_key is not None:
