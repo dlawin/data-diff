@@ -133,10 +133,10 @@ class DbtDiffer:
         table2_set_diff = list(set(table2_columns) - set(table1_columns))
 
         if len(table1_set_diff) > 0:
-            column_diffs_str += "Columns exclusive to table A: " + str(table1_set_diff) + "\n"
+            column_diffs_str += f"Columns exclusive to table A: {table1_set_diff}\n"
 
         if len(table2_set_diff) > 0:
-            column_diffs_str += "Columns exclusive to table B: " + str(table2_set_diff) + "\n"
+            column_diffs_str += f"Columns exclusive to table B: {table2_set_diff}\n"
 
         mutual_set.discard(primary_key)
         extra_columns = tuple(mutual_set)
