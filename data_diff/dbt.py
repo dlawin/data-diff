@@ -13,12 +13,12 @@ from dbt_artifacts_parser.parser import parse_run_results, parse_manifest
 from . import connect_to_table, diff_tables, Algorithm
 from dbt.config.renderer import ProfileRenderer
 
-CONST_RUN_RESULTS_PATH = "/target/run_results.json"
-CONST_MANIFEST_PATH = "/target/manifest.json"
-CONST_PROJECT_FILE = "/dbt_project.yml"
-CONST_PROFILES_FILE = "/profiles.yml"
-CONST_DBT_V_ABOVE = "1.0.0"
-CONST_DBT_V_BELOW = "1.4.0"
+RUN_RESULTS_PATH = "/target/run_results.json"
+MANIFEST_PATH = "/target/manifest.json"
+PROJECT_FILE = "/dbt_project.yml"
+PROFILES_FILE = "/profiles.yml"
+DBT_V_ABOVE = "1.0.0"
+DBT_V_BELOW = "1.4.0"
 
 
 @dataclass
@@ -55,7 +55,7 @@ class DbtDiffer:
                 self._cloud_diff(diff_vars)
             elif is_cloud:
                 rich.print(
-                    f"[red]"
+                    "[red]"
                     + ".".join(diff_vars.dev_path)
                     + " <> "
                     + ".".join(diff_vars.prod_path)
@@ -67,7 +67,7 @@ class DbtDiffer:
                 self._local_diff(diff_vars)
             elif not is_cloud:
                 rich.print(
-                    f"[red]"
+                    "[red]"
                     + ".".join(diff_vars.dev_path)
                     + " <> "
                     + ".".join(diff_vars.prod_path)
@@ -231,7 +231,7 @@ class DbtParser:
         return vars
 
     def get_models(self):
-        with open(self.project_dir + CONST_RUN_RESULTS_PATH) as run_results:
+        with open(self.project_dir + RUN_RESULTS_PATH) as run_results:
             run_results_dict = json.load(run_results)
             run_results_obj = parse_run_results(run_results=run_results_dict)
 
@@ -241,9 +241,9 @@ class DbtParser:
             "1.0.0"
         ) and dbt_version < parse_version(
             "1.4"
-        ), f"Found dbt: v{dbt_version} Expected the dbt project's version to be >= {CONST_DBT_V_ABOVE} and < {CONST_DBT_V_BELOW}"
+        ), f"Found dbt: v{dbt_version} Expected the dbt project's version to be >= {DBT_V_ABOVE} and < {DBT_V_BELOW}"
 
-        with open(self.project_dir + CONST_MANIFEST_PATH) as manifest:
+        with open(self.project_dir + MANIFEST_PATH) as manifest:
             manifest_dict = json.load(manifest)
             manifest_obj = parse_manifest(manifest=manifest_dict)
 
@@ -257,11 +257,11 @@ class DbtParser:
         return list((x.name for x in model.columns.values() if "primary-key" in x.tags))
 
     def set_project_dict(self):
-        with open(self.project_dir + CONST_PROJECT_FILE) as project:
+        with open(self.project_dir + PROJECT_FILE) as project:
             self.project_dict = yaml.safe_load(project)
 
     def set_connection(self):
-        with open(self.profiles_dir + CONST_PROFILES_FILE) as profiles:
+        with open(self.profiles_dir + PROFILES_FILE) as profiles:
             profiles = yaml.safe_load(profiles)
 
         try:
