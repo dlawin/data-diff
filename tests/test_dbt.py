@@ -533,7 +533,7 @@ class TestDbtDiffer(unittest.TestCase):
         mock_dbt_parser_inst.get_datadiff_variables.return_value = expected_dbt_vars_dict
         expected_diff_vars = DiffVars(["dev"], ["prod"], ["pks"], 123, None)
         mock_get_diff_vars.return_value = expected_diff_vars
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             DbtDiffer.diff(is_cloud=False)
 
         mock_dbt_parser_inst.get_models.assert_called_once()

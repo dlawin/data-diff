@@ -44,9 +44,8 @@ class DbtDiffer:
         if not is_cloud:
             dbt_parser.set_connection()
 
-        assert (
-            config_prod_database is not None or config_prod_schema is not None
-        ), "Expected a value for prod_database: or prod_schema: under \nvars:\n  data_diff: "
+        if config_prod_database is None or config_prod_schema is None:
+            raise ValueError("Expected a value for prod_database: or prod_schema: under \nvars:\n  data_diff: ")
 
         for model in models:
             diff_vars = self._get_diff_vars(dbt_parser, config_prod_database, config_prod_schema, model, datasource_id)
