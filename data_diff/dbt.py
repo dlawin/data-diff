@@ -196,7 +196,7 @@ class DbtDiffer:
             response.raise_for_status()
             data = response.json()
             id = data["id"]
-            diff_url = f"https://app.datafold.com/datadiffs/{str(id)}/overview"
+            diff_url = f"https://app.datafold.com/datadiffs/{id}/overview"
             rich.print(
                 "[red]"
                 + ".".join(diff_vars.dev_path)
