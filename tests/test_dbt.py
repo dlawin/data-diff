@@ -418,8 +418,7 @@ class TestDbtDiffer(unittest.TestCase):
 
         mock_request.assert_called_once()
         mock_print.assert_called_once()
-        mock_request.call_args
-        request_data_dict = json.loads(mock_request.call_args[1]["data"])
+        request_data_dict = mock_request.call_args[1]["json"]
         self.assertEqual(
             mock_request.call_args[1]["headers"]["Authorization"],
             "Key " + expected_api_key,
