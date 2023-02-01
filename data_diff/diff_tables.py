@@ -130,7 +130,26 @@ class DiffResultWrapper:
         diff_stats = self._get_stats()
 
         # Convert result_list into human-readable pandas table.
-        string_output = "\n\n"
+        string_output = ""
+
+        string_output += f"{diff_stats.table1_count} rows in table A\n"
+        string_output += f"{diff_stats.table2_count} rows in table B\n"
+        string_output += f"{diff_stats.diff_by_sign['-']} rows exclusive to table A (not present in B)\n"
+        string_output += f"{diff_stats.diff_by_sign['+']} rows exclusive to table B (not present in A)\n"
+        string_output += f"{diff_stats.diff_by_sign['!']} rows updated\n"
+        string_output += f"{diff_stats.unchanged} rows unchanged\n"
+        string_output += f"{100*diff_stats.diff_percent:.2f}% difference score\n"
+
+        if self.stats:
+            string_output += "\nExtra-Info:\n"
+            for k, v in sorted(self.stats.items()):
+                string_output += f"  {k} = {v}\n"
+        
+        return string_output
+
+    def get_stats_string_dbt(self):
+        
+        diff_stats = self._get_stats()
 
         for sign, values in self.result_list:
             store_extra_columns = self.info_tree.info.tables[0].extra_columns
