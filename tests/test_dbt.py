@@ -80,12 +80,30 @@ class TestDbtParser(unittest.TestCase):
     @patch("builtins.open", new_callable=mock_open, read_data="{}")
     @patch("data_diff.dbt.parse_run_results")
     @patch("data_diff.dbt.parse_manifest")
-    def test_get_models_bad_dbt_version(self, mock_manifest_parser, mock_run_parser, mock_open):
+    def test_get_models_bad_lower_dbt_version(self, mock_manifest_parser, mock_run_parser, mock_open):
         mock_self = Mock()
         mock_self.project_dir = ""
         mock_run_results = Mock()
         mock_run_parser.return_value = mock_run_results
         mock_run_results.metadata.dbt_version = "0.19.0"
+
+        with self.assertRaises(Exception) as ex:
+            DbtParser.get_models(mock_self)
+
+        mock_open.assert_called_once_with(RUN_RESULTS_PATH)
+        mock_run_parser.assert_called_once_with(run_results={})
+        mock_manifest_parser.assert_not_called()
+        self.assertIn("version to be", ex.exception.args[0])
+        
+    @patch("builtins.open", new_callable=mock_open, read_data="{}")
+    @patch("data_diff.dbt.parse_run_results")
+    @patch("data_diff.dbt.parse_manifest")
+    def test_get_models_bad_upper_dbt_version(self, mock_manifest_parser, mock_run_parser, mock_open):
+        mock_self = Mock()
+        mock_self.project_dir = ""
+        mock_run_results = Mock()
+        mock_run_parser.return_value = mock_run_results
+        mock_run_results.metadata.dbt_version = "1.5.1"
 
         with self.assertRaises(Exception) as ex:
             DbtParser.get_models(mock_self)

@@ -19,7 +19,7 @@ MANIFEST_PATH = "/target/manifest.json"
 PROJECT_FILE = "/dbt_project.yml"
 PROFILES_FILE = "/profiles.yml"
 LOWER_DBT_V = "1.0.0"
-UPPER_DBT_V = "1.4.0"
+UPPER_DBT_V = "1.5.0"
 
 
 @dataclass
@@ -229,7 +229,6 @@ class DbtParser:
             run_results_dict = json.load(run_results)
             run_results_obj = parse_run_results(run_results=run_results_dict)
 
-        # TODO need test for less than scenario
         dbt_version = parse_version(run_results_obj.metadata.dbt_version)
 
         # TODO 1.4 support
