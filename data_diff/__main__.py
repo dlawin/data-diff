@@ -13,7 +13,7 @@ import click
 from sqeleton.schema import create_schema
 from sqeleton.queries.api import current_timestamp
 
-from .dbt import DbtDiffer
+from .dbt import dbt_diff
 from .utils import eval_name_template, remove_password_from_url, safezip, match_like
 from .diff_tables import Algorithm
 from .hashdiff_tables import (
@@ -297,7 +297,7 @@ def main(conf, run, **kw):
 
     try:
         if kw["dbt"] or kw["dbt_cloud"]:
-            DbtDiffer.diff(
+            dbt_diff(
                 profiles_dir_override=kw["dbt_profiles_dir"],
                 project_dir_override=kw["dbt_project_dir"],
                 is_cloud=kw["dbt_cloud"],
