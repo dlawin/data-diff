@@ -83,7 +83,7 @@ def _get_diff_vars(
     config_prod_database: Optional[str],
     config_prod_schema: Optional[str],
     model,
-    datasource_id,
+    datasource_id: int,
 ) -> DiffVars:
     dev_database = model.database
     dev_schema = model.schema_
@@ -189,8 +189,7 @@ def _cloud_diff(diff_vars: DiffVars) -> None:
         }
     )
     headers = {
-        # f string
-        "Authorization": "Key " + api_key,
+        "Authorization": f"Key {api_key}",
         "Content-Type": "application/json",
     }
 
