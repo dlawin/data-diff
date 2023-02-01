@@ -3,6 +3,8 @@
 
 import re
 import time
+import pandas as pd
+from tabulate import tabulate
 from abc import ABC, abstractmethod
 from enum import Enum
 from contextlib import contextmanager
@@ -126,22 +128,66 @@ class DiffResultWrapper:
     def get_stats_string(self):
 
         diff_stats = self._get_stats()
-        string_output = ""
-        string_output += f"{diff_stats.table1_count} rows in table A\n"
-        string_output += f"{diff_stats.table2_count} rows in table B\n"
-        string_output += f"{diff_stats.diff_by_sign['-']} rows exclusive to table A (not present in B)\n"
-        string_output += f"{diff_stats.diff_by_sign['+']} rows exclusive to table B (not present in A)\n"
-        string_output += f"{diff_stats.diff_by_sign['!']} rows updated\n"
-        string_output += f"{diff_stats.unchanged} rows unchanged\n"
-        string_output += f"{100*diff_stats.diff_percent:.2f}% difference score\n"
 
-        if self.stats:
-            string_output += "\nExtra-Info:\n"
-            for k, v in sorted(self.stats.items()):
-                string_output += f"  {k} = {v}\n"
+        # Convert result_list into human-readable pandas table.
+        string_output = "\n\n"
+
+        for sign, values in self.result_list:
+            store_extra_columns = self.info_tree.info.tables[0].extra_columns
+            if store_extra_columns != None:
+                break
+        
+        diff_output = self.result_list.copy()
+        additional_columns_to_diff = list(store_extra_columns)
+        primary_key = self.info_tree.info.tables[0].key_columns[0]
+
+        df_output = pd.DataFrame(diff_output, columns =['a', 'b'])
+        column_values = pd.DataFrame(df_output['b'].to_list(), columns = [primary_key] + additional_columns_to_diff)
+        all_columns_values_tall = pd.concat([df_output, column_values], axis=1).\
+        drop('b', axis=1)
+        all_columns_values_tall.loc[all_columns_values_tall['a'] == '-', 'a'] = 'Prod'
+        all_columns_values_tall.loc[all_columns_values_tall['a'] == '+', 'a'] = 'Dev'
+        all_columns_values_pivot = all_columns_values_tall.\
+            pivot(index=primary_key, columns='a',values=[primary_key] + additional_columns_to_diff)
+
+        all_columns = [primary_key] + additional_columns_to_diff
+        each_column_twice = [item for item in all_columns for _ in range(2)]
+        tuples = [(x, 'Prod' if idx % 2 == 0 else 'Dev') for idx, x in enumerate(each_column_twice)]
+        index = pd.MultiIndex.from_tuples(tuples, names=[None, "a"])
+        df_with_index = pd.DataFrame(columns=index)
+        all_columns_values_pivot_multiindex = pd.concat([df_with_index, all_columns_values_pivot])
+
+        all_columns_values_pivot_multiindex.columns = [': '.join(i) for i in all_columns_values_pivot_multiindex.columns]
+        matching_primary_key_rows = all_columns_values_pivot_multiindex.loc[all_columns_values_pivot_multiindex[primary_key+": Prod"] == \
+        all_columns_values_pivot_multiindex[primary_key+": Dev"]]
+
+        # Display missing primary keys
+        pks_missing_from_table_a = all_columns_values_pivot_multiindex[[primary_key+": Prod"]].isna().sum()[0]   
+        pks_missing_from_table_b = all_columns_values_pivot_multiindex[[primary_key+": Dev"]].isna().sum()[0]
+        primary_keys_df = pd.DataFrame([[pks_missing_from_table_a, pks_missing_from_table_b]], columns=['Rows Added', 'Rows Removed'])
+        
+        #blankIndex=[''] * len(primary_keys_df)
+        #primary_keys_df.index=blankIndex
+        
+        string_output += tabulate(primary_keys_df, headers='keys', tablefmt='psql', showindex=False)
+        string_output += "\n\n"
+        
+        # Display columns with conflicts
+        columns_with_conflicts = []
+        conflicts_df = pd.DataFrame(columns=['Column', 'Conflicting Rows'])
+        
+        for i in additional_columns_to_diff:
+            conflicts = (matching_primary_key_rows[i+": Prod"] != matching_primary_key_rows[i+": Dev"]) & \
+                (matching_primary_key_rows[i+": Prod"].notnull() | matching_primary_key_rows[i+": Dev"].notnull())
+            sum_conflicts = sum(conflicts)
+            conflicts_df.loc[len(conflicts_df.index)] = [i, sum_conflicts]
+            if sum(conflicts) > 0:
+                columns_with_conflicts += [i+": Prod", i+": Dev"]
+        
+        string_output += tabulate(conflicts_df, headers='keys', tablefmt='psql', showindex=False)
 
         return string_output
-
+        
     def get_stats_dict(self):
 
         diff_stats = self._get_stats()
@@ -165,11 +211,9 @@ class TableDiffer(ThreadBase, ABC):
 
     def diff_tables(self, table1: TableSegment, table2: TableSegment, info_tree: InfoTree = None) -> DiffResultWrapper:
         """Diff the given tables.
-
         Parameters:
             table1 (TableSegment): The "before" table to compare. Or: source table
             table2 (TableSegment): The "after" table to compare. Or: target table
-
         Returns:
             An iterator that yield pair-tuples, representing the diff. Items can be either -
             ('-', row) for items in table1 but not in table2.
