@@ -133,7 +133,7 @@ class DiffResultWrapper:
         string_output += f"{diff_stats.diff_by_sign['+']} rows exclusive to table B (not present in A)\n"
         string_output += f"{diff_stats.diff_by_sign['!']} rows updated\n"
         string_output += f"{diff_stats.unchanged} rows unchanged\n"
-        string_output += f"{100*diff_stats.diff_percent:.2f}% difference score\n"
+        string_output += f"{100*diff_stats.diff_percent:.2f}% Difference score\n"
 
         if self.stats:
             string_output += "\nExtra-Info:\n"
