@@ -48,7 +48,6 @@ class TestDbtParser(unittest.TestCase):
         with self.assertRaises(Exception):
             DbtParser.get_datadiff_variables(mock_self)
 
-
     @patch("builtins.open", new_callable=mock_open, read_data="{}")
     @patch("data_diff.dbt.parse_run_results")
     @patch("data_diff.dbt.parse_manifest")

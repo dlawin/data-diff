@@ -21,6 +21,7 @@ PROFILES_FILE = "/profiles.yml"
 LOWER_DBT_V = "1.0.0"
 UPPER_DBT_V = "1.4.0"
 
+
 @dataclass
 class DiffVars:
     dev_path: List[str]
@@ -29,7 +30,10 @@ class DiffVars:
     datasource_id: str
     connection: dict[str, str]
 
-def dbt_diff(profiles_dir_override: Optional[str] = None, project_dir_override: Optional[str] = None, is_cloud: bool = False) -> None:
+
+def dbt_diff(
+    profiles_dir_override: Optional[str] = None, project_dir_override: Optional[str] = None, is_cloud: bool = False
+) -> None:
     dbt_parser = DbtParser(profiles_dir_override, project_dir_override, is_cloud)
     models = dbt_parser.get_models()
     dbt_parser.set_project_dict()
@@ -73,7 +77,14 @@ def dbt_diff(profiles_dir_override: Optional[str] = None, project_dir_override: 
 
         rich.print("Diffs Complete!")
 
-def _get_diff_vars(dbt_parser: 'DbtParser', config_prod_database: Optional[str], config_prod_schema: Optional[str], model, datasource_id) -> DiffVars:
+
+def _get_diff_vars(
+    dbt_parser: "DbtParser",
+    config_prod_database: Optional[str],
+    config_prod_schema: Optional[str],
+    model,
+    datasource_id,
+) -> DiffVars:
     dev_database = model.database
     dev_schema = model.schema_
     primary_keys = dbt_parser.get_primary_keys(model)
@@ -90,6 +101,7 @@ def _get_diff_vars(dbt_parser: 'DbtParser', config_prod_database: Optional[str],
         prod_qualified_list = [prod_database, prod_schema, model.name]
 
     return DiffVars(dev_qualified_list, prod_qualified_list, primary_keys, datasource_id, dbt_parser.connection)
+
 
 def _local_diff(diff_vars: DiffVars) -> None:
     column_diffs_str = ""
@@ -154,6 +166,7 @@ def _local_diff(diff_vars: DiffVars) -> None:
             + "[green]No row differences[/] \n"
         )
 
+
 def _cloud_diff(diff_vars: DiffVars) -> None:
     api_key = os.environ.get("DATAFOLD_API_KEY")
 
@@ -196,6 +209,7 @@ def _cloud_diff(diff_vars: DiffVars) -> None:
         + "\n"
     )
 
+
 class DbtParser:
     DEFAULT_PROFILES_DIR = os.path.expanduser("~") + "/.dbt"
     DEFAULT_PROJECT_DIR = os.getcwd()
@@ -220,8 +234,10 @@ class DbtParser:
         dbt_version = parse_version(run_results_obj.metadata.dbt_version)
 
         # TODO 1.4 support
-        if  dbt_version < parse_version(LOWER_DBT_V) or dbt_version >= parse_version(UPPER_DBT_V):
-            raise Exception(f"Found dbt: v{dbt_version} Expected the dbt project's version to be >= {LOWER_DBT_V} and < {UPPER_DBT_V}")
+        if dbt_version < parse_version(LOWER_DBT_V) or dbt_version >= parse_version(UPPER_DBT_V):
+            raise Exception(
+                f"Found dbt: v{dbt_version} Expected the dbt project's version to be >= {LOWER_DBT_V} and < {UPPER_DBT_V}"
+            )
 
         with open(self.project_dir + MANIFEST_PATH) as manifest:
             manifest_dict = json.load(manifest)
