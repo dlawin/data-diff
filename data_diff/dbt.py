@@ -179,21 +179,20 @@ def _cloud_diff(diff_vars: DiffVars) -> None:
 
     url = "https://app.datafold.com/api/v1/datadiffs"
 
-    payload = json.dumps(
-        {
-            "data_source1_id": diff_vars.datasource_id,
-            "data_source2_id": diff_vars.datasource_id,
-            "table1": diff_vars.dev_path,
-            "table2": diff_vars.prod_path,
-            "pk_columns": diff_vars.primary_keys,
-        }
-    )
+    payload = {
+        "data_source1_id": diff_vars.datasource_id,
+        "data_source2_id": diff_vars.datasource_id,
+        "table1": diff_vars.dev_path,
+        "table2": diff_vars.prod_path,
+        "pk_columns": diff_vars.primary_keys,
+    }
+
     headers = {
         "Authorization": f"Key {api_key}",
         "Content-Type": "application/json",
     }
 
-    response = requests.request("POST", url, headers=headers, data=payload, timeout=30)
+    response = requests.request("POST", url, headers=headers, json=payload, timeout=30)
     response.raise_for_status()
     data = response.json()
     diff_id = data["id"]
