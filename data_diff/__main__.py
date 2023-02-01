@@ -249,9 +249,9 @@ click.Context.formatter_class = MyHelpFormatter
     help="Run a diff using your local dbt project. Expects to be run from a dbt project folder by default.",
 )
 @click.option(
-    "--dbt-cloud",
+    "--cloud",
     is_flag=True,
-    help="Run a diff using your local dbt project on Datafold cloud. Expects an api key on env var DATAFOLD_API_KEY.",
+    help="Add this flag along with --dbt to run a diff using your local dbt project on Datafold cloud. Expects an api key on env var DATAFOLD_API_KEY.",
 )
 @click.option(
     "--dbt-profiles-dir",
@@ -296,11 +296,11 @@ def main(conf, run, **kw):
         logging.basicConfig(level=logging.WARNING, format=LOG_FORMAT, datefmt=DATE_FORMAT)
 
     try:
-        if kw["dbt"] or kw["dbt_cloud"]:
+        if kw["dbt"]:
             dbt_diff(
                 profiles_dir_override=kw["dbt_profiles_dir"],
                 project_dir_override=kw["dbt_project_dir"],
-                is_cloud=kw["dbt_cloud"],
+                is_cloud=kw["cloud"],
             )
         else:
             return _data_diff(**kw)
@@ -340,7 +340,7 @@ def _data_diff(
     table_write_limit,
     materialize_to_table,
     dbt,
-    dbt_cloud,
+    cloud,
     dbt_profiles_dir,
     dbt_project_dir,
     threads1=None,

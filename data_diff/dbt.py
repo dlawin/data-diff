@@ -269,10 +269,8 @@ class DbtParser:
         rendered_credentials = ProfileRenderer().render_data(credentials)
 
         if conn_type == "snowflake":
-            assert (
-                rendered_credentials.get("password") is not None
-                and rendered_credentials.get("private_key_path") is None
-            ), "Only password authentication is currently supported for Snowflake."
+            if rendered_credentials.get("password") is None or rendered_credentials.get("private_key_path") is not None:
+                raise Exception("Only password authentication is currently supported for Snowflake.")
             conn_info = {
                 "driver": conn_type,
                 "user": rendered_credentials.get("user"),
@@ -288,7 +286,8 @@ class DbtParser:
             method = rendered_credentials.get("method")
             # there are many connection types https://docs.getdbt.com/reference/warehouse-setups/bigquery-setup#oauth-via-gcloud
             # this assumes that the user is auth'd via `gcloud auth application-default login`
-            assert method is not None and method == "oauth", "Oauth is the current method supported for Big Query."
+            if method is None or method != "oauth":
+                raise Exception("Oauth is the current method supported for Big Query.")
             conn_info = {
                 "driver": conn_type,
                 "project": rendered_credentials.get("project"),
