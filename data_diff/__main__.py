@@ -490,10 +490,7 @@ def _data_diff(
         if json_output:
             rich.print(json.dumps(diff_iter.get_stats_dict()))
         else:
-            if dbt:
-                rich.print(diff_iter.get_stats_string())
-            else:
-                rich.print(diff_iter.get_stats_string_dbt())
+            rich.print(diff_iter.get_stats_string())
 
     else:
         for op, values in diff_iter:

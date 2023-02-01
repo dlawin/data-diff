@@ -129,9 +129,7 @@ class DiffResultWrapper:
 
         diff_stats = self._get_stats()
 
-        # Convert result_list into human-readable pandas table.
         string_output = ""
-
         string_output += f"{diff_stats.table1_count} rows in table A\n"
         string_output += f"{diff_stats.table2_count} rows in table B\n"
         string_output += f"{diff_stats.diff_by_sign['-']} rows exclusive to table A (not present in B)\n"
@@ -144,10 +142,12 @@ class DiffResultWrapper:
             string_output += "\nExtra-Info:\n"
             for k, v in sorted(self.stats.items()):
                 string_output += f"  {k} = {v}\n"
-        
         return string_output
 
     def get_stats_string_dbt(self):
+        
+
+        string_output = "\n\n"
         
         diff_stats = self._get_stats()
 
@@ -230,9 +230,11 @@ class TableDiffer(ThreadBase, ABC):
 
     def diff_tables(self, table1: TableSegment, table2: TableSegment, info_tree: InfoTree = None) -> DiffResultWrapper:
         """Diff the given tables.
+
         Parameters:
             table1 (TableSegment): The "before" table to compare. Or: source table
             table2 (TableSegment): The "after" table to compare. Or: target table
+
         Returns:
             An iterator that yield pair-tuples, representing the diff. Items can be either -
             ('-', row) for items in table1 but not in table2.
