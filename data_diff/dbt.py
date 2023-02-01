@@ -197,6 +197,7 @@ def _cloud_diff(diff_vars: DiffVars) -> None:
     response.raise_for_status()
     data = response.json()
     diff_id = data["id"]
+    # TODO in future we should support self hosted datafold
     diff_url = f"https://app.datafold.com/datadiffs/{diff_id}/overview"
     rich.print(
         "[red]"
