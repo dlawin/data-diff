@@ -198,7 +198,7 @@ class TestDbtParser(unittest.TestCase):
         mock_self.project_dict = {"profile": "profile_name"}
         mock_yaml_parse.return_value = profiles_dict
 
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(Exception):
             DbtParser.set_connection(mock_self)
 
         mock_open_file.assert_called_once_with(PROFILES_FILE)
@@ -341,7 +341,7 @@ class TestDbtDiffer(unittest.TestCase):
     def test_integration_cloud_dbt(self):
         project_dir = os.environ.get("DATA_DIFF_DBT_PROJ")
         if project_dir is not None:
-            diff = run_datadiff_cli("--dbt-cloud", "--dbt-project-dir", project_dir)
+            diff = run_datadiff_cli("--dbt", "--cloud", "--dbt-project-dir", project_dir)
             assert diff[-1].decode("utf-8") == "Diffs Complete!"
         else:
             pass
