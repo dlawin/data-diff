@@ -5,8 +5,7 @@ import rich
 import yaml
 from dataclasses import dataclass
 from packaging.version import parse as parse_version
-from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 import requests
 from dbt_artifacts_parser.parser import parse_run_results, parse_manifest
@@ -28,7 +27,7 @@ class DiffVars:
     prod_path: List[str]
     primary_keys: List[str]
     datasource_id: str
-    connection: dict[str, str]
+    connection: Dict[str, str]
 
 
 def dbt_diff(
